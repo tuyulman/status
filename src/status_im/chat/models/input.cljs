@@ -1,6 +1,7 @@
 (ns status-im.chat.models.input
   (:require [clojure.string :as string]
             [goog.object :as object]
+            [status-im.audio.core :as audio]
             [status-im.chat.constants :as chat.constants]
             [status-im.chat.models :as chat]
             [status-im.chat.models.message :as chat.message]
@@ -206,7 +207,8 @@
     (fx/merge cofx
               (send-messages input-text-with-mentions current-chat-id)
               (mentions/clear-mentions)
-              (mentions/clear-cursor))))
+              (mentions/clear-cursor)
+              (audio/play-in-app-sound :message_sent))))
 
 (fx/defn chat-send-sticker
   {:events [:chat/send-sticker]}
