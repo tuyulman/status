@@ -15,7 +15,8 @@
            :blue         "#6177E5"
            :gray         "#838C91"
            :blue-light   "#23252F"
-           :red          "#FC5F5F"})
+           :red          "#FC5F5F"
+           :yellow-light "#FFF3DB"})   ;; same hex for dark theme?
 
 (def light {:white        "#ffffff"
             :black        "#000000"
@@ -23,7 +24,8 @@
             :blue         "#4360df"
             :gray         "#939ba1"
             :blue-light   "#ECEFFC"
-            :red          "#ff2d55"})
+            :red          "#ff2d55"
+            :yellow-light "#FFF3DB"})
 
 (def themes {:dark dark :light light})
 
@@ -71,6 +73,9 @@
 ;; GREEN
 (def green "#44d058")                                       ;; icon for successful inboud transaction
 (def green-transparent-10 (alpha green 0.1))                ;; icon for successful inboud transaction
+
+;; YELLOW
+(def yellow-light (:yellow-light light))                    ;; Light yellow, used as background for pinned messages
 
 (def purple "#887af9")
 (def orange "#FE8F59")
@@ -127,5 +132,6 @@
       (set! gray-transparent-40 (alpha gray 0.4))
       (set! green-transparent-10 (alpha green 0.1))
       (set! red-transparent-10 (alpha red 0.1))
-      (set! blue-transparent-10 (alpha blue 0.1)))
+      (set! blue-transparent-10 (alpha blue 0.1))
+      (set! yellow-light (:yellow-light colors)))
     (reset! theme type)))

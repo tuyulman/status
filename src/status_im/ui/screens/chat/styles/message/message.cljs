@@ -65,6 +65,39 @@
     {:align-self    :flex-start
      :padding-left  8}))
 
+(defn pin-indicator [outgoing display-photo?]
+  (merge
+   {:flex-direction :row
+    :border-top-left-radius (if outgoing 12 4)
+    :border-top-right-radius (if outgoing 4 12)
+    :border-bottom-left-radius 12
+    :border-bottom-right-radius 12
+    :padding-left 8
+    :padding-right 10
+    :padding-vertical 5
+    :background-color (if outgoing colors/blue colors/gray-lighter)
+    :justify-content :center}
+   (if outgoing
+     {:align-self    :flex-end
+      :align-items :flex-end}
+     {:align-self    :flex-start
+      :align-items :flex-start})
+   (when display-photo?
+     {:margin-left 44})))
+
+(defn pin-indicator-container [outgoing]
+  (merge
+   {:margin-top 2
+    :align-items :center
+    :justify-content :center}
+   (if outgoing
+     {:align-self    :flex-end
+      :align-items :flex-end
+      :padding-right 8}
+     {:align-self    :flex-start
+      :align-items :flex-start
+      :padding-left  8})))
+
 (def message-author-touchable
   {:margin-left    12
    :flex-direction :row})
@@ -115,7 +148,7 @@
    :shadow-offset  {:width 0 :height 4}})
 
 (defn message-view
-  [{:keys [content-type outgoing group-chat last-in-group?]}]
+  [{:keys [content-type outgoing group-chat last-in-group? pinned?]}]
   (merge
    {:border-top-left-radius     16
     :border-top-right-radius    16
@@ -133,10 +166,12 @@
      {:border-bottom-right-radius 4}
      {:border-bottom-left-radius 4})
 
-   (cond
-     (= content-type constants/content-type-system-text) nil
-     outgoing                                            {:background-color colors/blue}
-     :else                                               {:background-color colors/blue-light})
+   (if pinned?
+     {:background-color colors/yellow-light}
+     (cond
+       (= content-type constants/content-type-system-text) nil
+       outgoing                                            {:background-color colors/blue}
+       :else                                               {:background-color colors/blue-light}))
 
    (when (= content-type constants/content-type-emoji)
      {:flex-direction :row})))

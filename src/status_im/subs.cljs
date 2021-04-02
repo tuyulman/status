@@ -194,6 +194,8 @@
 (reg-root-key-sub ::reactions :reactions)
 (reg-root-key-sub ::message-lists :message-lists)
 (reg-root-key-sub ::pagination-info :pagination-info)
+(reg-root-key-sub ::pin-message-lists :pin-message-lists)
+(reg-root-key-sub ::pin-messages :pin-messages)
 
 ;; keycard
 (reg-root-key-sub :keycard/new-account-sheet? :keycard/new-account-sheet?)
@@ -863,6 +865,12 @@
    (get messages chat-id {})))
 
 (re-frame/reg-sub
+ :chats/pinned
+ :<- [::pin-messages]
+ (fn [pin-messages [_ chat-id]]
+   (get pin-messages chat-id {})))
+
+(re-frame/reg-sub
  :chats/message-reactions
  :<- [:multiaccount/public-key]
  :<- [::reactions]
@@ -927,6 +935,12 @@
  (fn [message-lists [_ chat-id]]
    (get message-lists chat-id)))
 
+(re-frame/reg-sub
+ :chats/pin-message-list
+ :<- [::pin-message-lists]
+ (fn [pin-message-lists [_ chat-id]]
+   (get pin-message-lists chat-id)))
+
 (defn hydrate-messages
   "Pull data from messages and add it to the sorted list"
   [message-list messages]
@@ -989,6 +1003,22 @@
      @memo-profile-messages-stream)))
 
 (def memo-timeline-messages-stream (atom nil))
+
+(re-frame/reg-sub
+ :chats/pinned-messages-stream
+ (fn [[_ chat-id] _]
+   [(re-frame/subscribe [:chats/pin-message-list chat-id])
+    (re-frame/subscribe [:chats/pinned chat-id])
+    (re-frame/subscribe [:chats/messages-gaps chat-id])
+    (re-frame/subscribe [:chats/range chat-id])
+    (re-frame/subscribe [:chats/all-loaded? chat-id])
+    (re-frame/subscribe [:chats/public? chat-id])])
+ (fn [[message-list pin-messages messages-gaps range all-loaded? public?]]
+   (when (> (count pin-messages) 0)
+     (-> (models.message-list/->seq message-list)
+         (chat.db/add-datemarks)
+         (hydrate-messages pin-messages)
+         (chat.db/add-gaps messages-gaps range all-loaded? public?)))))
 
 (re-frame/reg-sub
  :chats/timeline-messages-stream

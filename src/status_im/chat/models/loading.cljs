@@ -69,16 +69,20 @@
           (reduce (fn [{:keys [all-messages] :as acc}
                        {:keys [message-id alias from]
                         :as   message}]
-                    (cond-> acc
-                      (and (not (string/blank? alias))
-                           (not (get-in db [:chats chat-id :users from])))
-                      (update :senders assoc from message)
+                    (let [message (if (get-in db [:pin-messages chat-id message-id])
+                                    (assoc-in message [:pinned?] true)
+                                    message)]
+                      (cond-> acc
+                        (and (not (string/blank? alias))
+                             (not (get-in db [:chats chat-id :users from])))
+                        (update :senders assoc from message)
 
-                      (nil? (get all-messages message-id))
-                      (update :new-messages conj message)
+                        (or (nil? (get all-messages message-id))
+                            (message :pinned?))
+                        (update :new-messages conj message)
 
-                      :always
-                      (update :all-messages assoc message-id message)))
+                        :always
+                        (update :all-messages assoc message-id message))))
                   {:all-messages already-loaded-messages
                    :senders      {}
                    :new-messages []}
@@ -114,7 +118,8 @@
           (merge
            {:db (assoc-in db [:pagination-info chat-id :loading-messages?] true)}
            {:utils/dispatch-later [{:ms 100 :dispatch [:load-more-reactions cursor chat-id]}
-                                   {:ms 100 :dispatch [:load-gaps chat-id]}]}
+                                   {:ms 100 :dispatch [:load-gaps chat-id]}
+                                   {:ms 100 :dispatch [:chat.ui/load-more-pin-messages-for-current-chat chat-id]}]}
            (data-store.messages/messages-by-chat-id-rpc
             chat-id
             cursor

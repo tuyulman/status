@@ -85,6 +85,8 @@
    "wakuext_getLinkPreviewWhitelist" {}
    "wakuext_getLinkPreviewData" {}
    "wakuext_requestCommunityInfoFromMailserver" {}
+   "wakuext_sendPinMessage" {}
+   "wakuext_chatPinnedMessages" {}
    ;;TODO not used anywhere?
    "wakuext_deleteChat" {}
    "wakuext_saveContact" {}

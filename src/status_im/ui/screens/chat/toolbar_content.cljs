@@ -53,3 +53,20 @@
 
 (defn toolbar-content-view []
   [toolbar-content-view-inner @(re-frame/subscribe [:chats/current-chat])])
+
+(defn toolbar-pin-content-view []
+  (let [{:keys [group-chat chat-id chat-name]}
+        @(re-frame/subscribe [:chats/current-chat])
+        pinned-messages @(re-frame/subscribe [:chats/pinned chat-id])]
+    [react/view {:style st/toolbar-container}
+     [react/view {:style st/pins-name-view}
+      (if group-chat
+        [react/text {:style               st/chat-name-text
+                     :number-of-lines     1
+                     :accessibility-label :chat-name-text}
+         chat-name]
+        [one-to-one-name chat-id])
+      [react/text {:style st/toolbar-subtitle}
+       (if (= (count pinned-messages) 0)
+         (i18n/label :t/no-pinned-messages)
+         (i18n/label-pluralize (count pinned-messages) :t/pinned-messages-count))]]]))

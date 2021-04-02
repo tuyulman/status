@@ -34,6 +34,8 @@
      :component referrals.public-chat/view}
     {:name      :chat
      :component chat/chat}
+    {:name      :chat-pinned-messages
+     :component chat/pinned-messages}
     {:name      :group-chat-profile
      :insets    {:top false}
      :component profile.group-chat/group-chat-profile}

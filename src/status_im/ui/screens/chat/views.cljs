@@ -54,6 +54,17 @@
                                        :padding-right 16}}
     [icons/icon :main-icons/more]]])
 
+(defn pins-topbar []
+  ;;we don't use topbar component, because we want chat view as simple (fast) as possible
+  [react/view {:height 56 :border-bottom-width 1 :border-bottom-color (:ui-01 @quo.colors/theme)}
+   [react/touchable-highlight {:on-press-in #(re-frame/dispatch [:navigate-back])
+                               :accessibility-label :back-button
+                               :style {:height 56 :width 40 :align-items :center :justify-content :center
+                                       :padding-left 16}}
+    [icons/icon :main-icons/arrow-left]]
+   [react/view {:flex 1 :left 52 :right 52 :top 0 :bottom 0 :position :absolute}
+    [toolbar-content/toolbar-pin-content-view]]])
+
 (defn invitation-requests [chat-id admins]
   (let [current-pk @(re-frame/subscribe [:multiaccount/public-key])
         admin? (get admins current-pk)]
@@ -143,6 +154,13 @@
      (if group-chat
        [chat-intro opts]
        [chat-intro-one-to-one opts]))])
+
+(defn pinned-messages-empty []
+  [react/view {:style {:flex 1
+                       :align-items :center
+                       :justify-content :center}}
+   [react/text {:style style/intro-header-description}
+    (i18n/label :t/pinned-messages-empty)]])
 
 (defonce messages-list-ref (atom nil))
 
@@ -284,6 +302,12 @@
     (utils/set-timeout #(re-frame/dispatch [:chat.ui/load-more-messages-for-current-chat])
                        (if platform/low-device? 700 200))))
 
+(defn pin-list-on-end-reached []
+  (if @state/scrolling
+    (re-frame/dispatch [:chat.ui/load-more-pin-messages-for-current-chat])
+    (utils/set-timeout #(re-frame/dispatch [:chat.ui/load-more-pin-messages-for-current-chat])
+                       (if platform/low-device? 700 200))))
+
 (defn messages-view [{:keys [chat bottom-space pan-responder space-keeper show-input?]}]
   (let [{:keys [group-chat chat-id public?]} chat
         messages @(re-frame/subscribe [:chats/chat-messages-stream chat-id])
@@ -317,6 +341,61 @@
        ;;TODO https://github.com/facebook/react-native/issues/30034
        :inverted                     (when platform/ios? true)
        :style                        (when platform/android? {:scaleY -1})})]))
+
+(defn pinned-messages-view [{:keys [chat bottom-space pan-responder space-keeper show-input?]}]
+  (let [{:keys [group-chat chat-id public?]} chat
+        pinned-messages @(re-frame/subscribe [:chats/pinned-messages-stream chat-id])
+        current-public-key @(re-frame/subscribe [:multiaccount/public-key])]
+    ;;do not use anonymous functions for handlers
+    (if (= (count pinned-messages) 0)
+      [pinned-messages-empty]
+      [list/flat-list
+       (merge
+        pan-responder
+        {:key-fn                       list-key-fn
+         :ref                          list-ref
+         :header                       [list-header chat]
+         :data                         (reverse pinned-messages)
+         :render-data                  {:group-chat         group-chat
+                                        :public?            public?
+                                        :current-public-key current-public-key
+                                        :space-keeper       space-keeper
+                                        :chat-id            chat-id
+                                        :show-input?        show-input?}
+         :render-fn                    render-fn
+         :on-viewable-items-changed    on-viewable-items-changed
+         :on-end-reached               pin-list-on-end-reached
+         :on-scroll-to-index-failed    identity              ;;don't remove this
+         :content-container-style      {:padding-top 16
+                                        :padding-bottom 16}
+         :scroll-indicator-insets      {:top bottom-space}    ;;ios only
+         :keyboard-dismiss-mode        :interactive
+         :keyboard-should-persist-taps :handled
+         :onMomentumScrollBegin        state/start-scrolling
+         :onMomentumScrollEnd          state/stop-scrolling})])))
+
+(defn pinned-messages []
+  (let [bottom-space (reagent/atom 0)
+        panel-space (reagent/atom 52)
+        active-panel (reagent/atom nil)
+        position-y (animated/value 0)
+        pan-state (animated/value 0)
+        text-input-ref (quo.react/create-ref)
+        pan-responder (accessory/create-pan-responder position-y pan-state)
+        space-keeper (get-space-keeper-ios bottom-space panel-space active-panel text-input-ref)]
+    (fn []
+      (let [chat
+            ;;we want to react only on these fields, do not use full chat map here
+            @(re-frame/subscribe [:chats/current-chat-chat-view])
+            max-bottom-space (max @bottom-space @panel-space)]
+        [:<>
+         [pins-topbar]
+         [connectivity/loading-indicator]
+         ;;MESSAGES LIST
+         [pinned-messages-view {:chat          chat
+                                :bottom-space  max-bottom-space
+                                :pan-responder pan-responder
+                                :space-keeper  space-keeper}]]))))
 
 (defn chat []
   (let [bottom-space (reagent/atom 0)

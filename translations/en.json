@@ -1515,5 +1515,15 @@
     "not-found": "Not found",
     "activity": "Activity",
     "reject-and-delete": "Reject and delete",
-    "accept-and-add": "Accept and add"
+    "accept-and-add": "Accept and add",
+    "pinned-messages": "Pinned messages",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "no-pinned-messages": "No pinned messages",
+    "pinned-messages-count": {
+        "one": "1 pinned message",
+        "other": "{{count}} pinned messages"
+    },
+    "pinned-messages-empty": "Pinned messages will appear here. To pin a message, press and hold it and tap `Pin`",
+    "pinned": "Pinned"
 }

@@ -19,7 +19,8 @@
             [status-im.mailserver.topics :as mailserver.topics]
             [status-im.mailserver.constants :as mailserver.constants]
             [status-im.chat.models.loading :as loading]
-            [status-im.ui.screens.chat.state :as chat.state]))
+            [status-im.ui.screens.chat.state :as chat.state]
+            [status-im.chat.models.pin-message :as pin-message]))
 
 (defn chats []
   (:chats (types/json->clj (js/require "./chats.js"))))
@@ -266,7 +267,14 @@
   (fx/merge cofx
             (when-not (or (group-chat? cofx chat-id) (timeline-chat? cofx chat-id))
               (transport.filters/load-chat chat-id))
-            (loading/load-messages chat-id)))
+            (loading/load-messages chat-id)
+            (pin-message/load-pin-messages chat-id)))
+
+(fx/defn preload-chat-pin-data
+  "Takes chat-id and coeffects map, returns effects necessary for preloading pinned messages"
+  {:events [:chat.ui/preload-chat-pin-data]}
+  [{:keys [db] :as cofx} chat-id]
+  (pin-message/load-pin-messages chat-id))
 
 (fx/defn navigate-to-chat
   "Takes coeffects map and chat-id, returns effects necessary for navigation and preloading data"
@@ -277,6 +285,15 @@
             #(assoc-in % [:db :current-chat-id] chat-id)
             (preload-chat-data chat-id)
             (navigation/navigate-to-cofx :chat-stack {:screen :chat})))
+
+(fx/defn navigate-to-user-pinned-messages
+  "Takes coeffects map and chat-id, returns effects necessary for navigation and preloading data"
+  {:events [:chat.ui/navigate-to-pinned-messages]}
+  [{db :db :as cofx} chat-id]
+  (fx/merge cofx
+            {:db (assoc db :current-chat-id chat-id)}
+            (preload-chat-data chat-id)
+            (navigation/navigate-to :chat-stack {:screen :chat-pinned-messages})))
 
 (fx/defn start-chat
   "Start a chat, making sure it exists"
