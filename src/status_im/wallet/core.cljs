@@ -683,6 +683,7 @@
    {:force-start?             true
     :ignore-syncing-settings? ignore-syncing-settings?}))
 
+;; cooldown time in milliseconds
 (def pull-to-refresh-cooldown-period (* 1 60 1000))
 
 (fx/defn restart-on-pull
