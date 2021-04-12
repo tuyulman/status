@@ -19,10 +19,6 @@
   # Android SDK requires an accepted license
   android_sdk.accept_license = true;
 
-  permittedInsecurePackages = [
-    # Android Env still needs old OpenSSL
-    "openssl-1.0.2u"
-    # Support for Go 1.14 ended with the release of Go 1.16
-    "go-1.14.15"
-  ];
+  # Android Env still needs old OpenSSL
+  permittedInsecurePackages = [ "openssl-1.0.2u" ];
 }
