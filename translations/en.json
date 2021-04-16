@@ -658,7 +658,7 @@
     "invited": "invited",
     "invite-button": "Invite",
     "invite-receive-account": "Account to receive your referral bonus",
-    "invite-instruction": "How it works",
+    "how-it-works": "How it works",
     "invite-warning": "This promotion is only valid for users of an Android device, who aren't residents of US. Friend needs to confirm referral within 7 days",
     "invite-instruction-first": "You send a unique invite link to your friend to download and join Status",
     "invite-instruction-second": "Your friend downloads Status and creates an account (on Android)",
@@ -1528,6 +1528,19 @@
     "anon-metrics-ephemeral-key": "Instead of your regular chat key, a single use key is used",
     "anon-metrics-usage-not-linked-to-ip": "Usage data cannot be associated with your IP address",
     "anon-metrics-removed-from-phone": "The data is removed from your phone after they are sent",
-    "anon-metrics-public-dashboard": "Cumulative data of all users is publicaly available View public dashboard"
-    "view-data": "View data"
+    "anon-metrics-public-dashboard": "Cumulative data of all users is publicaly available View public dashboard",
+    "view-data": "View data",
+    "data-collected": "Data collected",
+    "data-collected-subtitle": "The table below shows the exact data that is stored and will be sent. Data is validated against public rules to ensure no sensitive data is sent. Don’t trust, verify.",
+    "view-rules": "View rules",
+    "expand-all": "Expand all",
+    "about-sharing-data": "About sharing data",
+    "about-sharing-data-subtitle": "As open-source community project, Status asks you to share anonymous, non-invasive data to improve the app. This is strictly opt-in, and can be changed at any time in Settings.",
+    "sharing-data-desc-1": "Data is validated against public rules to ensure no sensitive data is sent. Don’t trust, verify.",
+    "sharing-data-desc-2": "Usage data is sent end-to-end encrypted over Status’ peer-to-peer network",
+    "sharing-data-desc-3": "Instead of your regular chat key, a single use key is used",
+    "sharing-data-desc-4": "Usage data cannot be associated with your IP address",
+    "sharing-data-desc-5": "Cumulative data of all users is publicaly available",
+    "view-public-dashboard": "View public dashboard",
+    "sharing-data-desc-6": "The data is removed from your phone after they are sent"
 }

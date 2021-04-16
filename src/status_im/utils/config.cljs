@@ -82,6 +82,7 @@
    :profile-pictures-visibility 1
    :log-level log-level
    :webview-allow-permission-requests? false
+   :anon-metrics/should-send? false
    :link-previews-enabled-sites #{}
    :link-preview-request-enabled true})
 

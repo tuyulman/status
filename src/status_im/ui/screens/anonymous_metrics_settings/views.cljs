@@ -2,7 +2,6 @@
   (:require-macros [status-im.utils.views :refer [defview letsubs]])
   (:require [re-frame.core :as re-frame]
             [status-im.react-native.resources :as resources]
-            [quo.components.button.view :as button]
             [status-im.ui.components.react :as react]
             [status-im.ui.components.colors :as colors]
             [status-im.i18n.i18n :as i18n]
@@ -45,7 +44,8 @@
                 :margin-vertical (:tiny spacing/spacing)}
     [icons/icon icon (into icon-opts
                            {:container-style {:margin-right (:tiny spacing/spacing)}})]
-    [react/text label]]))
+    [react/text {:style {:padding-right (:base spacing/spacing)}}
+     label]]))
 
 (defn what-is-shared []
   [:<>
@@ -56,22 +56,56 @@
      ^{:key label}
      [icon-list-item :main-icons/info {:color colors/blue} label])])
 
-(defn view-data-button []
+(defview view-data-bottom-sheet []
+  (let [events []]
+    [:<>
+     [quo/header {:title (i18n/label :t/data-collected)
+                :border-bottom false}]
+     [react/text {:text-align :center
+                  :style (:base spacing/padding-horizontal)}
+      (i18n/label :t/data-collected-subtitle)]]))
+
+(defn view-data-button [events]
   [react/view {:flex 1
                :align-items :center
                :style {:margin-top (:x-large spacing/spacing)}}
-   [button/button {:type :primary
-                   :theme :main}
+   [quo/button {:type :primary
+                   :theme :main
+                   :on-press #(re-frame/dispatch
+                               [:bottom-sheet/show-sheet :anon-metrics/view-data])}
     (i18n/label :t/view-data)]])
 
+(defn learn-more-bottom-sheet []
+  [:<>
+   [quo/header {:title (i18n/label :t/about-sharing-data)
+                :border-bottom false}]
+   [react/text {:text-align :center
+        }
+    (i18n/label :t/about-sharing-data-subtitle)]
+   [what-is-shared]
+   [view-data-button]
+   [quo/separator {:style {:margin-vertical (:base spacing/spacing)}}]
+   [quo/list-header (i18n/label :t/how-it-works)]
+   (for [label [(i18n/label :t/sharing-data-desc-1)
+                (i18n/label :t/sharing-data-desc-2)
+                (i18n/label :t/sharing-data-desc-3)
+                (i18n/label :t/sharing-data-desc-4)
+                (i18n/label :t/sharing-data-desc-5)
+                (i18n/label :t/sharing-data-desc-6)]]
+     ^{:key label}
+     [icon-list-item :main-icons/arrow-right label])
+    ])
+
+
 (defview settings []
-  (views/letsubs [opted-in? [:multiaccount :anon-metrics/should-send?]]
+  (views/letsubs [{:keys [:anon-metrics/should-send?]} [:multiaccount]]
     [react/view {:flex 1}
      [topbar/topbar {:title (i18n/label :t/anonymous-usage-data)}]
      [graphic-and-desc]
      [setting-switch
-      opted-in?
-      #(re-frame/dispatch [:multiaccounts.ui/share-anonymous-usage-data-switched (not opted-in?)])]
+      should-send?
+      #(re-frame/dispatch [:multiaccounts.ui/share-anonymous-usage-data-switched (not should-send?)])]
      [quo/separator]
      [what-is-shared]
      [view-data-button]]))
+
