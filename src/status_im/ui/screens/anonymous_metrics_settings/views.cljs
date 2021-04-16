@@ -15,18 +15,16 @@
    [react/view {:align-items     :center
                 :margin-vertical 25}
     [react/image {:source (resources/get-image :graph)}]]
-
-   [react/text {:style {:color             colors/gray
-                        :text-align        :center
-                        :margin-horizontal 24}}
-    (i18n/label :t/anonymous-usage-data-subtitle)]
-
    [react/touchable-highlight
-    {:on-press #(re-frame/dispatch [:keycard.onboarding.recovery-phrase.ui/learn-more-pressed])}
-    [react/text {:style {:color         colors/blue
-                         :margin-bottom 24
-                         :text-align    :center}}
-     (i18n/label :t/learn-more)]]])
+    {:on-press
+     #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
+    [react/nested-text
+     {:style (merge {:color      colors/gray
+                     :text-align :center}
+                    (:base spacing/padding-horizontal))}
+     (i18n/label :t/anonymous-usage-data-subtitle)
+     [{:style {:color colors/blue}}
+      (str " " (i18n/label :t/learn-more))]]]])
 
 (defn setting-switch [enabled? on-press]
   [quo/list-item {:title              (i18n/label :t/share-anonymous-usage-data)
@@ -44,8 +42,10 @@
                 :margin-vertical (:tiny spacing/spacing)}
     [icons/icon icon (into icon-opts
                            {:container-style {:margin-right (:tiny spacing/spacing)}})]
-    [react/text {:style {:padding-right (:base spacing/spacing)}}
-     label]]))
+    [react/view {:style {:padding-right (:base spacing/spacing)}}
+     (if (string? label)
+       [react/text label]
+       label)]]))
 
 (defn what-is-shared []
   [:<>
@@ -56,46 +56,74 @@
      ^{:key label}
      [icon-list-item :main-icons/info {:color colors/blue} label])])
 
+
+(defn event-item [event])
+
 (defview view-data-bottom-sheet []
   (let [events []]
     [:<>
-     [quo/header {:title (i18n/label :t/data-collected)
-                :border-bottom false}]
-     [react/text {:text-align :center
-                  :style (:base spacing/padding-horizontal)}
-      (i18n/label :t/data-collected-subtitle)]]))
+     [quo/header {:title         (i18n/label :t/data-collected)
+                  :border-bottom false}]
+     [react/touchable-highlight
+      {:on-press
+       #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
+      [react/nested-text
+       {:style (merge {:text-align :center}
+                      (:base spacing/padding-horizontal))}
+       (i18n/label :t/data-collected-subtitle)
+       [{:style {:color colors/blue}}
+        (str " " (i18n/label :t/view-rules))]]]
+
+     (for [event events]
+       ^{:key (:created_at event)}
+       (event-item event))]))
 
 (defn view-data-button [events]
   [react/view {:flex 1
                :align-items :center
                :style {:margin-top (:x-large spacing/spacing)}}
    [quo/button {:type :primary
-                   :theme :main
-                   :on-press #(re-frame/dispatch
-                               [:bottom-sheet/show-sheet :anon-metrics/view-data])}
+                :theme :main
+                :on-press #(re-frame/dispatch
+                            [:bottom-sheet/show-sheet :anon-metrics/view-data])}
     (i18n/label :t/view-data)]])
+
+(defn desc-point-with-link [desc link-text]
+  [:<>
+   [react/text desc]
+   [react/view {:flex-direction :row}
+    [react/text {:style {:text-align :center
+                         :color      colors/blue}}
+     link-text]
+    [icons/tiny-icon :tiny-icons/tiny-external
+     {:color           colors/blue
+      :container-style {:margin-left 4
+                        :margin-top  4}}]]])
 
 (defn learn-more-bottom-sheet []
   [:<>
    [quo/header {:title (i18n/label :t/about-sharing-data)
                 :border-bottom false}]
-   [react/text {:text-align :center
-        }
+   [react/text {:style (merge
+                        (:base spacing/padding-horizontal)
+                        (:base spacing/padding-vertical))}
     (i18n/label :t/about-sharing-data-subtitle)]
    [what-is-shared]
    [view-data-button]
    [quo/separator {:style {:margin-vertical (:base spacing/spacing)}}]
    [quo/list-header (i18n/label :t/how-it-works)]
-   (for [label [(i18n/label :t/sharing-data-desc-1)
+   (for [label [[desc-point-with-link
+                 (i18n/label :t/sharing-data-desc-1)
+                 (i18n/label :t/view-rules)]
                 (i18n/label :t/sharing-data-desc-2)
                 (i18n/label :t/sharing-data-desc-3)
                 (i18n/label :t/sharing-data-desc-4)
-                (i18n/label :t/sharing-data-desc-5)
+                [desc-point-with-link
+                 (i18n/label :t/sharing-data-desc-5)
+                 (i18n/label :t/view-public-dashboard)]
                 (i18n/label :t/sharing-data-desc-6)]]
      ^{:key label}
-     [icon-list-item :main-icons/arrow-right label])
-    ])
-
+     [icon-list-item :main-icons/arrow-right label])])
 
 (defview settings []
   (views/letsubs [{:keys [:anon-metrics/should-send?]} [:multiaccount]]
