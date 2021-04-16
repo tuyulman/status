@@ -1529,4 +1529,5 @@
     "anon-metrics-usage-not-linked-to-ip": "Usage data cannot be associated with your IP address",
     "anon-metrics-removed-from-phone": "The data is removed from your phone after they are sent",
     "anon-metrics-public-dashboard": "Cumulative data of all users is publicaly available View public dashboard"
+    "view-data": "View data"
 }

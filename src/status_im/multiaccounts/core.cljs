@@ -130,6 +130,14 @@
    :webview-allow-permission-requests? (boolean enabled?)
    {}))
 
+(fx/defn switch-share-anonymous-usage-data
+  {:events [:multiaccounts.ui/share-anonymous-usage-data-switched]}
+  [cofx opted-in?]
+  (multiaccounts.update/multiaccount-update
+   cofx
+   :anon-metrics/should-send? (boolean opted-in?)
+   {}))
+
 (fx/defn switch-preview-privacy-mode-flag
   [{:keys [db]}]
   (let [private? (get-in db [:multiaccount :preview-privacy?])]

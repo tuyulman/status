@@ -2,6 +2,7 @@
   (:require-macros [status-im.utils.views :refer [defview letsubs]])
   (:require [re-frame.core :as re-frame]
             [status-im.react-native.resources :as resources]
+            [quo.components.button.view :as button]
             [status-im.ui.components.react :as react]
             [status-im.ui.components.colors :as colors]
             [status-im.i18n.i18n :as i18n]
@@ -35,22 +36,42 @@
                   :subtitle-max-lines 2
                   :on-press           on-press}])
 
+(defn icon-list-item
+  ([icon label]
+   (icon-list-item icon {} label))
+  ([icon icon-opts label]
+   [react/view {:flex-direction :row
+                :margin-horizontal (:base spacing/spacing)
+                :margin-vertical (:tiny spacing/spacing)}
+    [icons/icon icon (into icon-opts
+                           {:container-style {:margin-right (:tiny spacing/spacing)}})]
+    [react/text label]]))
+
 (defn what-is-shared []
   [:<>
    [quo/list-header (i18n/label :t/what-is-shared)]
    (for [label [(i18n/label :t/anon-metrics-your-interactions)
                 (i18n/label :t/anon-metrics-bg-activity)
                 (i18n/label :t/anon-metrics-settings-and-prefs)]]
-     [quo/list-item {:title label
-                     :size  :small
-                     :icon  :main-icons/info}])])
+     ^{:key label}
+     [icon-list-item :main-icons/info {:color colors/blue} label])])
+
+(defn view-data-button []
+  [react/view {:flex 1
+               :align-items :center
+               :style {:margin-top (:x-large spacing/spacing)}}
+   [button/button {:type :primary
+                   :theme :main}
+    (i18n/label :t/view-data)]])
 
 (defview settings []
-  (views/letsubs []
+  (views/letsubs [opted-in? [:multiaccount :anon-metrics/should-send?]]
     [react/view {:flex 1}
      [topbar/topbar {:title (i18n/label :t/anonymous-usage-data)}]
      [graphic-and-desc]
-     [setting-switch true #()]
+     [setting-switch
+      opted-in?
+      #(re-frame/dispatch [:multiaccounts.ui/share-anonymous-usage-data-switched (not opted-in?)])]
      [quo/separator]
      [what-is-shared]
-]))
+     [view-data-button]]))
