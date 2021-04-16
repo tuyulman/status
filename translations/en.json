@@ -1515,5 +1515,18 @@
     "not-found": "Not found",
     "activity": "Activity",
     "reject-and-delete": "Reject and delete",
-    "accept-and-add": "Accept and add"
+    "accept-and-add": "Accept and add",
+    "anonymous-usage-data": "Anonymous usage data",
+    "anonymous-usage-data-subtitle": "Share anonymous, end-to-end ecrypted data about how you use Status.",
+    "share-anonymous-usage-data": "Share anonymous usage data",
+    "what-is-shared": "What is shared",
+    "anon-metrics-your-interactions": "Your interactions with the app like clicks and screen views",
+    "anon-metrics-bg-activity": "Background activity and internal processes",
+    "anon-metrics-settings-and-prefs": "Settings and preferences",
+    "anon-metrics-data-is-validated": "Data is validated against public validation rules to ensure no sensitive data is sent.",
+    "anon-metrics-usage-data-sent": "Usage data is sent end-to-end encrypted over Status’ peer-to-peer network",
+    "anon-metrics-ephemeral-key": "Instead of your regular chat key, a single use key is used",
+    "anon-metrics-usage-not-linked-to-ip": "Usage data cannot be associated with your IP address",
+    "anon-metrics-removed-from-phone": "The data is removed from your phone after they are sent",
+    "anon-metrics-public-dashboard": "Cumulative data of all users is publicaly available View public dashboard"
 }
