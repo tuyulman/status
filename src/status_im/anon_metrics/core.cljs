@@ -4,6 +4,7 @@
             [re-frame.core :as re-frame]
             [re-frame.interceptor :refer [->interceptor]]
             [status-im.utils.async :refer [async-periodic-exec async-periodic-stop!]]
+            [status-im.ethereum.json-rpc :as json-rpc]
             [status-im.utils.platform :as platform]
             [status-im.utils.build :as build]
             [status-im.utils.fx :as fx]
@@ -85,6 +86,23 @@
   [_ {:keys [og-event]}]
   ;; re-shape event to look like a context object
   {::transform-and-log {:coeffects {:event og-event}}})
+
+(fx/defn fetch-local-metrics-success
+  {:events [::fetch-local-metrics-success]}
+  [{:keys [db]} metrics]
+  {:db (assoc db :anon-metric-events metrics)})
+
+(fx/defn fetch-local-metrics
+  {:events [::fetch-local-metrics]}
+  [_ [limit offset]]
+  {::json-rpc/call [{:method     "appmetrics_getAppMetrics"
+                     :params     [(or limit 1000) (or offset 0)]
+                     :on-success #(re-frame/dispatch [::fetch-local-metrics-success %])}]})
+
+(re-frame/reg-sub
+ ::events
+ (fn [db]
+   (get db :anon-metric-events [])))
 
 (comment
   ;; read the database

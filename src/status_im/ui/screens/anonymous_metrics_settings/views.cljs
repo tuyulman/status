@@ -2,6 +2,7 @@
   (:require-macros [status-im.utils.views :refer [defview letsubs]])
   (:require [re-frame.core :as re-frame]
             [status-im.react-native.resources :as resources]
+            [status-im.anon-metrics.core :as anon-metrics]
             [status-im.ui.components.react :as react]
             [status-im.ui.components.colors :as colors]
             [status-im.i18n.i18n :as i18n]
@@ -57,10 +58,12 @@
      [icon-list-item :main-icons/info {:color colors/blue} label])])
 
 
-(defn event-item [event])
+(defn event-item [event]
+  [react/text "kuch aya"])
 
 (defview view-data-bottom-sheet []
-  (let [events []]
+  (letsubs [events [::anon-metrics/events]]
+    {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-local-metrics])}
     [:<>
      [quo/header {:title         (i18n/label :t/data-collected)
                   :border-bottom false}]
@@ -73,10 +76,12 @@
        (i18n/label :t/data-collected-subtitle)
        [{:style {:color colors/blue}}
         (str " " (i18n/label :t/view-rules))]]]
-
-     (for [event events]
-       ^{:key (:created_at event)}
-       (event-item event))]))
+     [react/view {:style (merge
+                          (:base spacing/padding-vertical)
+                          (:base spacing/padding-horizontal))}
+      (for [event events]
+        ^{:key (:created_at event)}
+        [event-item event])]]))
 
 (defn view-data-button [events]
   [react/view {:flex 1
@@ -126,7 +131,7 @@
      [icon-list-item :main-icons/arrow-right label])])
 
 (defview settings []
-  (views/letsubs [{:keys [:anon-metrics/should-send?]} [:multiaccount]]
+  (letsubs [{:keys [:anon-metrics/should-send?]} [:multiaccount]]
     [react/view {:flex 1}
      [topbar/topbar {:title (i18n/label :t/anonymous-usage-data)}]
      [graphic-and-desc]
@@ -136,4 +141,3 @@
      [quo/separator]
      [what-is-shared]
      [view-data-button]]))
-
