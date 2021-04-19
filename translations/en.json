@@ -1542,5 +1542,8 @@
     "sharing-data-desc-4": "Usage data cannot be associated with your IP address",
     "sharing-data-desc-5": "Cumulative data of all users is publicaly available",
     "view-public-dashboard": "View public dashboard",
-    "sharing-data-desc-6": "The data is removed from your phone after they are sent"
+  "sharing-data-desc-6": "The data is removed from your phone after they are sent",
+  "allow-and-send": "Allow and send",
+  "no-thanks": "No thanks",
+  "help-improve-status": "Help improve Status"
 }

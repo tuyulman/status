@@ -12,11 +12,14 @@
             [status-im.ui.components.topbar :as topbar]
             [quo.core :as quo]))
 
-(defn graphic-and-desc []
+(defn graphic-and-desc [{:keys [show-title?]}]
   [:<>
    [react/view {:align-items     :center
                 :margin-vertical 25}
     [react/image {:source (resources/get-image :graph)}]]
+   (when show-title?
+     [quo/header {:title         (i18n/label :t/help-improve-status)
+                  :border-bottom false}])
    [react/touchable-highlight
     {:on-press
      #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
@@ -108,7 +111,7 @@
           [event-item event])
         events))]]))
 
-(defn view-data-button [events]
+(defn view-data-button []
   [react/view {:flex 1
                :align-items :center
                :style {:margin-top (:x-large spacing/spacing)}}
@@ -166,3 +169,34 @@
      [quo/separator]
      [what-is-shared]
      [view-data-button]]))
+
+(defn allow-or-not-actions []
+  [react/view {:flex        1
+               :align-items :center
+               :style       {:margin-top (:x-large spacing/spacing)}}
+   [quo/button {:type     :primary
+                :theme    :main
+                :on-press #(re-frame/dispatch
+                            [:bottom-sheet/show-sheet :anon-metrics/view-data])}
+    (i18n/label :t/allow-and-send)]
+   [react/view {:style {:margin-top (:base spacing/spacing)}}]
+   [quo/button {:type     :primary
+                :theme    :main
+                :on-press #(re-frame/dispatch
+                            [:bottom-sheet/show-sheet :anon-metrics/view-data])}
+    (i18n/label :t/no-thanks)]])
+
+(defn new-account-opt-in []
+  [react/view {:flex 1}
+   [graphic-and-desc {:show-title? true}]
+   [react/view {:style (:base spacing/padding-vertical)}
+    [quo/separator]]
+   [what-is-shared]
+   [react/view {:style (:base spacing/padding-vertical)}
+    [quo/separator]]
+   [allow-or-not-actions]
+   ])
+
+(comment
+  (re-frame/dispatch [:navigate-to :anon-metrics-opt-in])
+  )

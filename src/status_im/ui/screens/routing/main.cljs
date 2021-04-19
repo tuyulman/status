@@ -32,6 +32,7 @@
             [status-im.ui.screens.keycard.recovery.views :as keycard.recovery]
             [status-im.keycard.core :as keycard.core]
             [status-im.ui.screens.keycard.views :as keycard]
+            [status-im.ui.screens.anonymous-metrics-settings.views :as anon-metrics]
             [status-im.ui.screens.multiaccounts.key-storage.views :as key-storage.views]))
 
 (defonce main-stack (navigation/create-stack))
@@ -80,6 +81,9 @@
        {:name         :welcome
         :back-handler :noop
         :component    home/welcome}
+       {:name         :anon-metrics-opt-in
+        :back-handler :noop
+        :component    anon-metrics/new-account-opt-in}
        {:name       :new-chat
         :on-focus   [::new-chat.events/new-chat-focus]
         :transition :presentation-ios

@@ -104,6 +104,16 @@
  (fn [db]
    (get db :anon-metric-events [])))
 
+(fx/defn opt-in
+  {:events [::opt-in]}
+  [_]
+  {})
+
+(fx/defn opt-out
+  {:events [::opt-out]}
+  [_]
+  {})
+
 (comment
   ;; read the database
   (def events-in-db (atom nil))
