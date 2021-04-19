@@ -75,11 +75,12 @@
                       :chevron             true
                       :accessory           :text
                       :accessory-text      (i18n/label (if messages-from-contacts-only
-                                                              :t/contacts
-                                                              :t/anyone))
+                                                         :t/contacts
+                                                         :t/anyone))
                       :on-press            #(re-frame/dispatch [:navigate-to :messages-from-contacts-only])
                       :accessibility-label :accept-new-chats-from}]
-      [quo/list-item {:title               (i18n/label :t/anonymous-usage-data)
+      [quo/list-item {:size                :small
+                      :title               (i18n/label :t/anonymous-usage-data)
                       :chevron             true
                       :on-press            #(re-frame/dispatch [:navigate-to :anonymous-metrics-settings])
                       :accessibility-label :anonymous-usage-data}]
@@ -91,8 +92,8 @@
                         :subtitle           (i18n/label :t/webview-camera-permission-requests-subtitle)
                         :subtitle-max-lines 2
                         :on-press           #(re-frame/dispatch
-                                                   [:multiaccounts.ui/webview-permission-requests-switched
-                                                    ((complement boolean) webview-allow-permission-requests?)])}])
+                                              [:multiaccounts.ui/webview-permission-requests-switched
+                                               ((complement boolean) webview-allow-permission-requests?)])}])
       [separator]
       [quo/list-item
        {:size                :small

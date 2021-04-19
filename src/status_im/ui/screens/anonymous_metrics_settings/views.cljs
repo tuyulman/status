@@ -3,6 +3,7 @@
   (:require [re-frame.core :as re-frame]
             [status-im.react-native.resources :as resources]
             [status-im.anon-metrics.core :as anon-metrics]
+            [status-im.ui.components.accordion :as accordion]
             [status-im.ui.components.react :as react]
             [status-im.ui.components.colors :as colors]
             [status-im.i18n.i18n :as i18n]
@@ -59,7 +60,24 @@
 
 
 (defn event-item [event]
-  [react/text "kuch aya"])
+  [accordion/section
+   {:title [react/view {:flex           1
+                        :flex-direction :row
+                        :margin-bottom  (:base spacing/spacing)}
+            [react/view {:style {:padding-right (:base spacing/spacing)}}
+             (for [label ["event" "time" "os"]]
+               ^{:key label}
+               [react/text {:style {:color colors/gray}}
+                label])]
+
+            [react/view
+             [react/text (:event event)]
+             [react/text (:created_at event)]
+             [react/text (:os event)]]]
+    :content [react/view {:style {:background-color colors/gray-lighter
+                                  :padding          (:small spacing/spacing)
+                                  :border-radius    14}}
+              [react/text (:value event)]]}])
 
 (defview view-data-bottom-sheet []
   (letsubs [events [::anon-metrics/events]]
@@ -71,17 +89,24 @@
       {:on-press
        #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
       [react/nested-text
-       {:style (merge {:text-align :center}
-                      (:base spacing/padding-horizontal))}
+       {:style (:base spacing/padding-horizontal)}
        (i18n/label :t/data-collected-subtitle)
        [{:style {:color colors/blue}}
         (str " " (i18n/label :t/view-rules))]]]
-     [react/view {:style (merge
-                          (:base spacing/padding-vertical)
-                          (:base spacing/padding-horizontal))}
-      (for [event events]
-        ^{:key (:created_at event)}
-        [event-item event])]]))
+     [react/scroll-view
+      {:style (merge
+               {:border-width  1
+                :border-radius 8
+                :border-color  colors/gray-lighter
+                :margin        16}
+               (:base spacing/padding-vertical)
+               (:base spacing/padding-horizontal))}
+      (doall
+       (map-indexed
+        (fn [index event]
+          ^{:key index}
+          [event-item event])
+        events))]]))
 
 (defn view-data-button [events]
   [react/view {:flex 1
