@@ -3,6 +3,7 @@
             [taoensso.timbre :as log]
             [re-frame.core :as re-frame]
             [re-frame.interceptor :refer [->interceptor]]
+            [status-im.multiaccounts.update.core :as multiaccounts.update]
             [status-im.utils.async :refer [async-periodic-exec async-periodic-stop!]]
             [status-im.ethereum.json-rpc :as json-rpc]
             [status-im.utils.platform :as platform]
@@ -106,13 +107,22 @@
 
 (fx/defn opt-in
   {:events [::opt-in]}
-  [_]
-  {})
+  [cofx]
+  (multiaccounts.update/multiaccount-update
+   cofx
+   :anon-metrics/should-send? true
+   ;; didn't use navigate-to-cofx with fx/merge
+   ;; because that leads to a circular dependency
+   {:on-success #(re-frame/dispatch [:navigate-to :home])}))
 
 (fx/defn opt-out
   {:events [::opt-out]}
-  [_]
-  {})
+  [cofx]
+  (multiaccounts.update/multiaccount-update
+   cofx
+   :anon-metrics/should-send? false
+   {:on-success #(re-frame/dispatch [:navigate-to :home])}))
+
 
 (comment
   ;; read the database

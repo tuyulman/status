@@ -96,7 +96,7 @@
        (i18n/label :t/data-collected-subtitle)
        [{:style {:color colors/blue}}
         (str " " (i18n/label :t/view-rules))]]]
-     [react/scroll-view
+     [react/view
       {:style (merge
                {:border-width  1
                 :border-radius 8
@@ -176,14 +176,12 @@
                :style       {:margin-top (:x-large spacing/spacing)}}
    [quo/button {:type     :primary
                 :theme    :main
-                :on-press #(re-frame/dispatch
-                            [:bottom-sheet/show-sheet :anon-metrics/view-data])}
+                :on-press #(re-frame/dispatch [::anon-metrics/opt-in])}
     (i18n/label :t/allow-and-send)]
    [react/view {:style {:margin-top (:base spacing/spacing)}}]
    [quo/button {:type     :primary
                 :theme    :main
-                :on-press #(re-frame/dispatch
-                            [:bottom-sheet/show-sheet :anon-metrics/view-data])}
+                :on-press #(re-frame/dispatch [::anon-metrics/opt-out])}
     (i18n/label :t/no-thanks)]])
 
 (defn new-account-opt-in []
@@ -194,8 +192,7 @@
    [what-is-shared]
    [react/view {:style (:base spacing/padding-vertical)}
     [quo/separator]]
-   [allow-or-not-actions]
-   ])
+   [allow-or-not-actions]])
 
 (comment
   (re-frame/dispatch [:navigate-to :anon-metrics-opt-in])
