@@ -3,6 +3,7 @@
             [reagent.core :as reagent]
             [status-im.i18n.i18n :as i18n]
             [status-im.react-native.resources :as resources]
+            [status-im.anon-metrics.core :as anon-metrics]
             [status-im.communities.core :as communities]
             [status-im.ui.components.connectivity.view :as connectivity]
             [status-im.ui.components.icons.icons :as icons]
@@ -223,6 +224,13 @@
         [react/view {:style               tabs.styles/counter-public
                      :accessibility-label :notifications-unread-badge}]])]))
 
+(views/defview redirect-to-metrics-opt-in-screen []
+  {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
+  (views/letsubs [metrics-opt-in-displayed? [::anon-metrics/opt-in-screen-displayed?]]
+    (when-not metrics-opt-in-displayed?
+      (re-frame/dispatch [:navigate-to :anon-metrics-opt-in]))
+    []))
+
 (defn home []
   [react/keyboard-avoiding-view {:style {:flex 1}}
    [topbar/topbar {:title           (i18n/label :t/chat)
@@ -230,5 +238,6 @@
                    :right-component [react/view {:flex-direction :row :margin-right 16}
                                      [connectivity/connectivity-button]
                                      [notifications-button]]}]
+   ;; [redirect-to-metrics-opt-in-screen]
    [chats-list]
    [plus-button]])

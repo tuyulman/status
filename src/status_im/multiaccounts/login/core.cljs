@@ -505,8 +505,7 @@
     (fx/merge cofx
               (when first-account?
                 (acquisition/create))
-              (navigation/navigate-reset {:index  0
-                                          :routes [{:name :tabs}]}))))
+              (navigation/navigate-to :anon-metrics-opt-in {}))))
 
 (fx/defn multiaccount-selected
   {:events [:multiaccounts.login.ui/multiaccount-selected]}

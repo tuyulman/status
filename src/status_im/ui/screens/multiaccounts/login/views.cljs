@@ -1,6 +1,7 @@
 (ns status-im.ui.screens.multiaccounts.login.views
   (:require [re-frame.core :as re-frame]
             [status-im.i18n.i18n :as i18n]
+            [status-im.anon-metrics.core :as anon-metrics]
             [status-im.multiaccounts.core :as multiaccounts]
             [status-im.ui.components.checkbox.view :as checkbox]
             [status-im.ui.components.react :as react]
@@ -39,6 +40,7 @@
      (utils/get-shortened-address public-key)]]])
 
 (defview login []
+  {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
   (letsubs [{:keys [error processing save-password?] :as multiaccount} [:multiaccounts/login]
             password-text-input (atom nil)
             sign-in-enabled? [:sign-in-enabled?]

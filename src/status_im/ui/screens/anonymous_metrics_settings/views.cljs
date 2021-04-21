@@ -176,12 +176,12 @@
                :style       {:margin-top (:x-large spacing/spacing)}}
    [quo/button {:type     :primary
                 :theme    :main
-                :on-press #(re-frame/dispatch [::anon-metrics/opt-in])}
+                :on-press #(re-frame/dispatch [::anon-metrics/opt-in true])}
     (i18n/label :t/allow-and-send)]
    [react/view {:style {:margin-top (:base spacing/spacing)}}]
    [quo/button {:type     :primary
                 :theme    :main
-                :on-press #(re-frame/dispatch [::anon-metrics/opt-out])}
+                :on-press #(re-frame/dispatch [::anon-metrics/opt-in false])}
     (i18n/label :t/no-thanks)]])
 
 (defn new-account-opt-in []

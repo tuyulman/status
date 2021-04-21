@@ -3,6 +3,7 @@
             [taoensso.timbre :as log]
             [re-frame.core :as re-frame]
             [re-frame.interceptor :refer [->interceptor]]
+            [status-im.async-storage.core :as async-storage]
             [status-im.multiaccounts.update.core :as multiaccounts.update]
             [status-im.utils.async :refer [async-periodic-exec async-periodic-stop!]]
             [status-im.ethereum.json-rpc :as json-rpc]
@@ -107,22 +108,28 @@
 
 (fx/defn opt-in
   {:events [::opt-in]}
-  [cofx]
-  (multiaccounts.update/multiaccount-update
+  [cofx enabled?]
+  (fx/merge
    cofx
-   :anon-metrics/should-send? true
-   ;; didn't use navigate-to-cofx with fx/merge
-   ;; because that leads to a circular dependency
-   {:on-success #(re-frame/dispatch [:navigate-to :home])}))
+   {::async-storage/set! {::opt-in-screen-displayed? true}}
+   (multiaccounts.update/multiaccount-update
+    :anon-metrics/should-send? enabled?
+    {:on-success #(re-frame/dispatch
+                   [:navigate-reset
+                    {:index  0
+                     :routes [{:name :tabs}]}])})))
 
-(fx/defn opt-out
-  {:events [::opt-out]}
+(fx/defn fetch-opt-in-screen-displayed?
+  {:events [::fetch-opt-in-screen-displayed?]}
   [cofx]
-  (multiaccounts.update/multiaccount-update
-   cofx
-   :anon-metrics/should-send? false
-   {:on-success #(re-frame/dispatch [:navigate-to :home])}))
+  {::async-storage/get
+   {:keys [::opt-in-screen-displayed?]
+    :cb #(re-frame/dispatch [:set ::opt-in-screen-displayed? %])}})
 
+(re-frame/reg-sub
+ ::opt-in-screen-displayed?
+ (fn [db]
+   (get db ::opt-in-screen-displayed?)))
 
 (comment
   ;; read the database
