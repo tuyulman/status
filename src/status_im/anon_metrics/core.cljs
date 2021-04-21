@@ -124,12 +124,12 @@
   [cofx]
   {::async-storage/get
    {:keys [::opt-in-screen-displayed?]
-    :cb #(re-frame/dispatch [:set ::opt-in-screen-displayed? %])}})
+    :cb #(re-frame/dispatch [:set :anon-metrics/opt-in-screen-displayed? %])}})
 
 (re-frame/reg-sub
  ::opt-in-screen-displayed?
  (fn [db]
-   (get db ::opt-in-screen-displayed?)))
+   (get db :anon-metrics/opt-in-screen-displayed?)))
 
 (comment
   ;; read the database

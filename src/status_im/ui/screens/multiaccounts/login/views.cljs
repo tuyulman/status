@@ -40,7 +40,6 @@
      (utils/get-shortened-address public-key)]]])
 
 (defview login []
-  {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
   (letsubs [{:keys [error processing save-password?] :as multiaccount} [:multiaccounts/login]
             password-text-input (atom nil)
             sign-in-enabled? [:sign-in-enabled?]
@@ -49,6 +48,7 @@
             supported-biometric-auth [:supported-biometric-auth]
             keycard?                 [:keycard-multiaccount?]
             banner-hidden [:keycard/banner-hidden]]
+    {:component-will-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
     [react/keyboard-avoiding-view {:style ast/multiaccounts-view}
      [topbar/topbar {:border-bottom     false
                      :right-accessories [{:icon                :more

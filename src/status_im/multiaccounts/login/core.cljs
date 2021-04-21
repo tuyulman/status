@@ -340,12 +340,14 @@
   (let [{:keys [key-uid password save-password? creating?]}
         (:multiaccounts/login db)
 
-        multiaccounts      (:multiaccounts/multiaccounts db)
-        recovered-account? (get db :recovered-account?)
-        login-only?        (not (or creating?
+        multiaccounts            (:multiaccounts/multiaccounts db)
+        recovered-account?       (get db :recovered-account?)
+        login-only?              (not (or creating?
                                     recovered-account?
                                     (keycard-setup? cofx)))
-        nodes              nil]
+        nodes                    nil
+        should-send-metrics?     (-> db :multiaccount :anon-metrics/should-send?)
+        opt-in-screen-displayed? (-> db ::anon-metrics/opt-in-screen-displayed?)]
     (log/debug "[multiaccount] multiaccount-login-success"
                "login-only?" login-only?
                "recovered-account?" recovered-account?)
@@ -364,7 +366,8 @@
                [{:method     "web3_clientVersion"
                  :on-success #(re-frame/dispatch [::initialize-web3-client-version %])}]}
               ;; Start tasks to save usage data locally
-              (anon-metrics/start-transferring)
+              (when should-send-metrics?
+                (anon-metrics/start-transferring))
               ;;FIXME
               (when nodes
                 (fleet/set-nodes :eth.contract nodes))
@@ -373,7 +376,9 @@
                 (wallet/set-initial-blocks-range))
               (if login-only?
                 (login-only-events key-uid password save-password?)
-                (create-only-events)))))
+                (create-only-events))
+              (when (and login-only? (not opt-in-screen-displayed?))
+                (navigation/navigate-to :anon-metrics-opt-in {})))))
 
 ;; FIXME(Ferossgp): We should not copy keys as we denormalize the database,
 ;; this create desync between actual accounts and the one on login causing broken state
