@@ -347,10 +347,11 @@
                                     (keycard-setup? cofx)))
         nodes                    nil
         should-send-metrics?     (-> db :multiaccount :anon-metrics/should-send?)
-        opt-in-screen-displayed? (-> db ::anon-metrics/opt-in-screen-displayed?)]
+        opt-in-screen-displayed? (-> db :anon-metrics/opt-in-screen-displayed?)]
     (log/debug "[multiaccount] multiaccount-login-success"
                "login-only?" login-only?
                "recovered-account?" recovered-account?)
+    (prn :-------> should-send-metrics? opt-in-screen-displayed?)
     (fx/merge cofx
               {:db (-> db
                        (dissoc :connectivity/ui-status-properties)

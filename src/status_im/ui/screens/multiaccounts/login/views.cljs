@@ -48,7 +48,9 @@
             supported-biometric-auth [:supported-biometric-auth]
             keycard?                 [:keycard-multiaccount?]
             banner-hidden [:keycard/banner-hidden]]
-    {:component-will-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
+    ;; init fetch to determine whether metrics opt-in screen has been displayed
+    ;; this event will populate the app-db and is used in login success handler
+    {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-opt-in-screen-displayed?])}
     [react/keyboard-avoiding-view {:style ast/multiaccounts-view}
      [topbar/topbar {:border-bottom     false
                      :right-accessories [{:icon                :more

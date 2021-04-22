@@ -10,7 +10,8 @@
             [quo.design-system.spacing :as spacing]
             [status-im.ui.components.icons.icons :as icons]
             [status-im.ui.components.topbar :as topbar]
-            [quo.core :as quo]))
+            [quo.core :as quo]
+            ["react-native-skeleton-content-nonexpo" :as skeleton-content]))
 
 (defn graphic-and-desc [{:keys [show-title?]}]
   [:<>
@@ -61,6 +62,11 @@
      ^{:key label}
      [icon-list-item :main-icons/info {:color colors/blue} label])])
 
+(defn event-skeleton []
+  [:> skeleton-content {:isLoading true
+                        :layout    [{:key    "key"
+                                     :width  240
+                                     :height 20}]}])
 
 (defn event-item [event]
   [accordion/section
@@ -104,6 +110,7 @@
                 :margin        16}
                (:base spacing/padding-vertical)
                (:base spacing/padding-horizontal))}
+      [event-skeleton]
       (doall
        (map-indexed
         (fn [index event]

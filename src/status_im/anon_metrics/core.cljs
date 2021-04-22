@@ -23,13 +23,13 @@
     (when (seq outstanding-events)
       (reset! events-foyer [])
       (json-rpc/call
-       {:method   "appmetrics_saveAppMetrics"
-        :params   [outstanding-events]
+       {:method     "appmetrics_saveAppMetrics"
+        :params     [outstanding-events]
         :on-success #()
-        :on-error (fn [err]
-                    (log/error {:error  err
-                                :events outstanding-events})
-                    (log/warn "All outstanding events will be rejected"))}))))
+        :on-error   (fn [err]
+                      (log/error {:error  err
+                                  :events outstanding-events})
+                      (log/warn "The logged events will be rejected"))}))))
 
 (re-frame/reg-fx
  ::transfer-data
@@ -45,11 +45,10 @@
                (async-periodic-exec onboard-events 4000 5000)))
      (do
        (log/info "[anon-metrics] Stop collection service")
-       (async-periodic-stop! @periodic-tasks-chan)
-       (reset! periodic-tasks-chan nil)
-
-       ;; final onboard, will save and clear any pending events
-       (onboard-events)))))
+       (when @periodic-tasks-chan
+         (async-periodic-stop! @periodic-tasks-chan)
+         (onboard-events) ; final onboard, will save and clear any pending events
+         (reset! periodic-tasks-chan nil))))))
 
 (fx/defn start-transferring
   [_]
@@ -69,6 +68,8 @@
       :app_version build/version
       :os          platform/os})))
 
+(re-frame/reg-fx ::transform-and-log transform-and-log)
+
 (defn catch-events-before [context]
   (transform-and-log context)
   context)
@@ -78,7 +79,6 @@
    :id     :catch-events
    :before catch-events-before))
 
-(re-frame/reg-fx ::transform-and-log transform-and-log)
 
 (fx/defn hoax-capture-event
   "Due to usage of fx/defn with fx/merge, it might not be able to
@@ -98,7 +98,7 @@
   {:events [::fetch-local-metrics]}
   [_ [limit offset]]
   {::json-rpc/call [{:method     "appmetrics_getAppMetrics"
-                     :params     [(or limit 1000) (or offset 0)]
+                     :params     [(or limit 20) (or offset 0)]
                      :on-success #(re-frame/dispatch [::fetch-local-metrics-success %])}]})
 
 (re-frame/reg-sub
@@ -106,25 +106,38 @@
  (fn [db]
    (get db :anon-metric-events [])))
 
+(fx/defn set-opt-in-screen-displayed-flag
+  [_]
+  {::async-storage/set! {:anon-metrics/opt-in-screen-displayed? true}})
+
 (fx/defn opt-in
   {:events [::opt-in]}
   [cofx enabled?]
-  (fx/merge
-   cofx
-   {::async-storage/set! {::opt-in-screen-displayed? true}}
-   (multiaccounts.update/multiaccount-update
-    :anon-metrics/should-send? enabled?
-    {:on-success #(re-frame/dispatch
-                   [:navigate-reset
-                    {:index  0
-                     :routes [{:name :tabs}]}])})))
+  (fx/merge cofx
+            (set-opt-in-screen-displayed-flag)
+            (if enabled?
+              (start-transferring)
+              (stop-transferring))
+            (multiaccounts.update/multiaccount-update
+             :anon-metrics/should-send? enabled?
+             {:on-success #(re-frame/dispatch
+                            [:navigate-reset
+                             {:index  0
+                              :routes [{:name :tabs}]}])})))
 
 (fx/defn fetch-opt-in-screen-displayed?
   {:events [::fetch-opt-in-screen-displayed?]}
   [cofx]
   {::async-storage/get
-   {:keys [::opt-in-screen-displayed?]
-    :cb #(re-frame/dispatch [:set :anon-metrics/opt-in-screen-displayed? %])}})
+   {:keys [:anon-metrics/opt-in-screen-displayed?]
+    ;; the first arg to callback is a map where keys are the requested keys
+    ;; and vals are their values from async storage
+    ;; the thread-last macro is used  to generate
+    ;; a vector like [:set :key :value]
+    :cb #(re-frame/dispatch (->> %
+                                 seq
+                                 first
+                                 (into [:set])))}})
 
 (re-frame/reg-sub
  ::opt-in-screen-displayed?
@@ -140,3 +153,4 @@
   (json-rpc/call {:method     "appmetrics_getAppMetrics"
                   :params     [1000 0] ; limit, offset
                   :on-success #(reset! events-in-db %)}))
+
