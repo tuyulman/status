@@ -10,8 +10,7 @@
             [quo.design-system.spacing :as spacing]
             [status-im.ui.components.icons.icons :as icons]
             [status-im.ui.components.topbar :as topbar]
-            [quo.core :as quo]
-            ["react-native-skeleton-content-nonexpo" :as skeleton-content]))
+            [quo.core :as quo]))
 
 (defn graphic-and-desc [{:keys [show-title?]}]
   [:<>
@@ -62,12 +61,6 @@
      ^{:key label}
      [icon-list-item :main-icons/info {:color colors/blue} label])])
 
-(defn event-skeleton []
-  [:> skeleton-content {:isLoading true
-                        :layout    [{:key    "key"
-                                     :width  240
-                                     :height 20}]}])
-
 (defn event-item [event]
   [accordion/section
    {:title [react/view {:flex           1
@@ -88,20 +81,29 @@
                                   :border-radius    14}}
               [react/text (:value event)]]}])
 
+(defn data-sheet-header-and-desc []
+  [:<>
+   [quo/header {:title         (i18n/label :t/data-collected)
+                :border-bottom false}]
+   [react/touchable-highlight
+    {:on-press
+     #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
+    [react/nested-text
+     {:style (:base spacing/padding-horizontal)}
+     (i18n/label :t/data-collected-subtitle)
+     [{:style {:color colors/blue}}
+      (str " " (i18n/label :t/view-rules))]]]])
+
 (defview view-data-bottom-sheet []
-  (letsubs [events [::anon-metrics/events]]
-    {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-local-metrics])}
+  (letsubs [events [::anon-metrics/events]
+            all-fetched? [::anon-metrics/all-fetched?]
+            fetching? [::anon-metrics/fetching?]]
+    {:component-did-mount #(re-frame/dispatch [::anon-metrics/fetch-local-metrics
+                                               {:clear-existing? true
+                                                :limit           2
+                                                :offset          0}])}
     [:<>
-     [quo/header {:title         (i18n/label :t/data-collected)
-                  :border-bottom false}]
-     [react/touchable-highlight
-      {:on-press
-       #(re-frame/dispatch [:bottom-sheet/show-sheet :anon-metrics/learn-more])}
-      [react/nested-text
-       {:style (:base spacing/padding-horizontal)}
-       (i18n/label :t/data-collected-subtitle)
-       [{:style {:color colors/blue}}
-        (str " " (i18n/label :t/view-rules))]]]
+     [data-sheet-header-and-desc]
      [react/view
       {:style (merge
                {:border-width  1
@@ -110,13 +112,22 @@
                 :margin        16}
                (:base spacing/padding-vertical)
                (:base spacing/padding-horizontal))}
-      [event-skeleton]
       (doall
        (map-indexed
         (fn [index event]
           ^{:key index}
           [event-item event])
-        events))]]))
+        events))
+      (if fetching?
+        [react/activity-indicator {:size      :large
+                                   :animating true}]
+        [quo/button {:type     :primary
+                     :disabled all-fetched?
+                     :on-press #(re-frame/dispatch [::anon-metrics/fetch-local-metrics
+                                                    {:clear-existing? false
+                                                     :limit           2
+                                                     :offset          (count events)}])}
+         (i18n/label :t/show-more)])]]))
 
 (defn view-data-button []
   [react/view {:flex 1

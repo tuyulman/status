@@ -91,20 +91,43 @@
 
 (fx/defn fetch-local-metrics-success
   {:events [::fetch-local-metrics-success]}
-  [{:keys [db]} metrics]
-  {:db (assoc db :anon-metric-events metrics)})
+  [{:keys [db]} {:keys [metrics clear-existing?]}]
+  {:db (-> db
+           (as-> db
+               (if clear-existing?
+                 (assoc db :anon-metric-events metrics)
+                 (update db :anon-metric-events concat metrics)))
+           (dissoc :anon-metrics-fetching?)
+           (assoc :anon-metrics-all-fetched? (-> metrics
+                                                 seq
+                                                 boolean
+                                                 not)))})
 
 (fx/defn fetch-local-metrics
   {:events [::fetch-local-metrics]}
-  [_ [limit offset]]
+  [{:keys [db]} {:keys [limit offset clear-existing?]}]
   {::json-rpc/call [{:method     "appmetrics_getAppMetrics"
-                     :params     [(or limit 20) (or offset 0)]
-                     :on-success #(re-frame/dispatch [::fetch-local-metrics-success %])}]})
+                     :params     [(or limit 3) (or offset 0)]
+                     :on-success #(re-frame/dispatch
+                                   [::fetch-local-metrics-success
+                                    {:metrics (or % [])
+                                     :clear-existing? clear-existing?}])}]
+   :db (assoc db :anon-metrics-fetching? true)})
 
 (re-frame/reg-sub
  ::events
  (fn [db]
    (get db :anon-metric-events [])))
+
+(re-frame/reg-sub
+ ::fetching?
+ (fn [db]
+   (get db :anon-metrics-fetching?)))
+
+(re-frame/reg-sub
+ ::all-fetched?
+ (fn [db]
+   (get db :anon-metrics-all-fetched?)))
 
 (fx/defn set-opt-in-screen-displayed-flag
   [_]
