@@ -213,5 +213,4 @@
    [allow-or-not-actions]])
 
 (comment
-  (re-frame/dispatch [:navigate-to :anon-metrics-opt-in])
-  )
+  (re-frame/dispatch [:navigate-to :anon-metrics-opt-in]))

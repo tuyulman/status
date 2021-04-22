@@ -22,16 +22,16 @@
     (fn [{:keys [title content icon]}]
       [react/view {:padding-vertical 8}
        (if (string? title)
-           [quo/list-item
-            {:title     title
-             :icon      icon
-             :on-press  #(swap! opened? not)
-             :accessory [dd-icon @opened?]}]
-           [react/touchable-opacity {:on-press #(swap! opened? not)}
-            [react/view {:flex-direction  :row
-                         :justify-content :space-between}
-             title
-             [dd-icon @opened?]]])
+         [quo/list-item
+          {:title     title
+           :icon      icon
+           :on-press  #(swap! opened? not)
+           :accessory [dd-icon @opened?]}]
+         [react/touchable-opacity {:on-press #(swap! opened? not)}
+          [react/view {:flex-direction  :row
+                       :justify-content :space-between}
+           title
+           [dd-icon @opened?]]])
        (when @opened?
          content)])))
 

@@ -1,6 +1,5 @@
 (ns status-im.anon-metrics.core
-  (:require [status-im.ethereum.json-rpc :as json-rpc]
-            [taoensso.timbre :as log]
+  (:require [taoensso.timbre :as log]
             [re-frame.core :as re-frame]
             [re-frame.interceptor :refer [->interceptor]]
             [status-im.async-storage.core :as async-storage]
@@ -79,7 +78,6 @@
    :id     :catch-events
    :before catch-events-before))
 
-
 (fx/defn hoax-capture-event
   "Due to usage of fx/defn with fx/merge, it might not be able to
   intercept some events (like navigate-to-cofx). In cases like that,
@@ -94,9 +92,9 @@
   [{:keys [db]} {:keys [metrics clear-existing?]}]
   {:db (-> db
            (as-> db
-               (if clear-existing?
-                 (assoc db :anon-metric-events metrics)
-                 (update db :anon-metric-events concat metrics)))
+                 (if clear-existing?
+                   (assoc db :anon-metric-events metrics)
+                   (update db :anon-metric-events concat metrics)))
            (dissoc :anon-metrics-fetching?)
            (assoc :anon-metrics-all-fetched? (-> metrics
                                                  seq

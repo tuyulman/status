@@ -135,12 +135,12 @@
   {:events [:multiaccounts.ui/share-anonymous-usage-data-switched]}
   [cofx opted-in?]
   (fx/merge cofx
-   (multiaccounts.update/multiaccount-update
-    :anon-metrics/should-send? (boolean opted-in?)
-    {})
-   (if opted-in?
-     (anon-metrics/start-transferring)
-     (anon-metrics/stop-transferring))))
+            (multiaccounts.update/multiaccount-update
+             :anon-metrics/should-send? (boolean opted-in?)
+             {})
+            (if opted-in?
+              (anon-metrics/start-transferring)
+              (anon-metrics/stop-transferring))))
 
 (fx/defn switch-preview-privacy-mode-flag
   [{:keys [db]}]
