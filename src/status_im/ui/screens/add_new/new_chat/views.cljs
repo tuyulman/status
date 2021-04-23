@@ -20,7 +20,8 @@
             [status-im.ethereum.ens :as ens]
             [quo.platform :as platform]
             [status-im.transport.filters.core :as filters]
-            [status-im.utils.identicon :as identicon])
+            [status-im.utils.identicon :as identicon]
+            [status-im.react-native.resources :as resources])
   (:require-macros [status-im.utils.views :as views]))
 
 (defn- render-row [row]
@@ -88,7 +89,12 @@
 (views/defview new-chat []
   (views/letsubs [contacts      [:contacts/active]
                   {:keys [state ens-name public-key error]} [:contacts/new-identity]
-                  search-value (reagent/atom "")]
+                  search-value (reagent/atom "")
+                  {current-public-key :public-key preferred-name :preferred-name} @(re-frame/subscribe [:multiaccount])
+                  on-share        #(re-frame/dispatch [:show-popover
+                                                       {:view     :share-chat-key
+                                                        :address  current-public-key
+                                                        :ens-name preferred-name}])]
     [react/view {:style {:flex 1}}
      [topbar/topbar
       {:title  (i18n/label :t/new-chat)
@@ -167,7 +173,30 @@
            (if (is-valid-username? @search-value)
              (when (= state :error)
                (get-validation-label error))
-             (i18n/label :t/invalid-username-or-key))])])]))
+             (i18n/label :t/invalid-username-or-key))])])
+     [react/touchable-opacity {:style {:padding-horizontal 2
+                                       :height 36
+                                       :width 124
+                                       :background-color colors/blue
+                                       :border-radius 18
+                                       :position :absolute
+                                       :bottom 42
+                                       :align-self :center
+                                       :elevation 8
+                                       :shadow-offset {:width 0 :height 4}
+                                       :shadow-color "rgba(0, 34, 51, 0.16)"
+                                       :shadow-radius 4
+                                       :shadow-opacity 1}
+                               :on-press on-share}
+      [react/view {:style {:flex 1
+                           :flex-direction :row
+                           :align-items :center}}
+       [react/image {:source (:contact resources/ui)
+                     :style  {:width 32 :height 32 :margin-right 6}}]
+       [quo/text {:size  :base
+                  :weight :medium
+                  :color :inverse}
+        (i18n/label :t/my-profile)]]]]))
 
 (defn- nickname-input [entered-nickname]
   [quo/text-input
