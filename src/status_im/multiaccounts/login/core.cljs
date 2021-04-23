@@ -98,7 +98,7 @@
          :else
          (wallet/update-balances nil scan-all-tokens?))
    (when-not (get db :wallet/new-account)
-     (wallet/restart-wallet-service {:force-start? true}))
+     (wallet/restart-wallet-service nil))
    (when-not (utils.mobile-sync/syncing-allowed? cofx)
      (transactions/get-fetched-transfers))
    (prices/update-prices)))
@@ -358,8 +358,7 @@
                                :pin
                                :multiaccount)
                        (assoc :logged-in-since now)
-                       (assoc :view-id :home)
-                       (assoc :wallet/waiting-for-recent-history? true))
+                       (assoc :view-id :home))
                ::json-rpc/call
                [{:method     "web3_clientVersion"
                  :on-success #(re-frame/dispatch [::initialize-web3-client-version %])}]}
